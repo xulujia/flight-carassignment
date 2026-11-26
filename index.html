@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>课程作业2：Tesla Flying Roadster 全方位安全分析</title>
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0;font-family:"Microsoft YaHei",sans-serif;}
+        body{background:#f5f7fa;color:#222;line-height:1.7;max-width:1100px;margin:0 auto;padding:24px;}
+        header{background:#1f4e79;color:#fff;padding:30px;border-radius:12px;margin-bottom:24px;}
+        h1{font-size:28px;margin-bottom:8px;}
+        h2{color:#1f4e79;border-left:5px solid #348eda;padding-left:12px;margin:28px 0 12px;font-size:22px;}
+        h3{margin:16px 0 8px;color:#2c5282;}
+        p{margin-bottom:12px;}
+        .box{background:#fff;padding:20px;border-radius:10px;box-shadow:0 2px 10px #00000010;margin-bottom:20px;}
+        ul{padding-left:24px;margin-bottom:12px;}
+        .ref{font-size:14px;color:#555;}
+        .warn{background:#fff3cd;border-left:5px solid #ffc107;padding:14px;border-radius:6px;}
+        .danger{background:#f8d7da;border-left:5px solid #dc3545;padding:14px;border-radius:6px;}
+        footer{margin-top:40px;text-align:center;color:#666;font-size:14px;}
+    </style>
+</head>
+<body>
+<header>
+    <h1>课程作业2：Tesla Flying Roadster 全方位安全分析</h1>
+    <p>飞行汽车技术基础｜系统安全工程分析，承接上一次调研作业</p>
+</header>
+
+<div class="box">
+    <h2>一、分析对象简介</h2>
+    <p>本次安全分析对象为 Tesla Flying Roadster，即搭载SpaceX冷气体液氮推进系统的陆空两栖跑车。地面依靠4680电池电驱动，飞行模式依靠多组高压液氮喷口实现推力矢量控制，短时垂直起降与低空机动。本分析基于系统安全工程思路，从危险识别、风险评估、失效模式、安全策略、适航合规维度展开。</p>
+</div>
+
+<div class="box">
+    <h2>二、系统危险源识别（HAZOP危险与可操作性分析）</h2>
+    <h3>1. 高压液氮推进子系统（最高风险单元）</h3>
+    <ul>
+        <li>高压容器：气瓶超压、疲劳裂纹、碰撞破裂，液氮泄漏；低温冻伤、高压喷射冲击；氮气置换造成密闭空间缺氧窒息</li>
+        <li>阀门与管路：电磁阀卡滞、管路泄漏，推力失控，喷口误触发</li>
+        <li>推进剂耗尽：飞行途中氮气提前耗尽，失去升力，直接坠地</li>
+    </ul>
+    <h3>2. 动力电池与地面驱动子系统</h3>
+    <ul>
+        <li>电池热失控、穿刺起火；飞行工况下振动加剧，电池包密封失效</li>
+        <li>电驱、逆变器故障，地面行驶动力丢失；飞行模式下电池供电故障，感知、飞控断电</li>
+    </ul>
+    <h3>3. 飞行姿态控制子系统</h3>
+    <ul>
+        <li>传感器（IMU、高度计、GNSS）失效、受干扰，姿态解算错误</li>
+        <li>多喷口推力不均衡，俯仰/滚转失控，飞行器失稳</li>
+        <li>飞控软件bug、算力异常、通信中断，控制指令失效</li>
+    </ul>
+    <h3>4. 环境与空域危险源</h3>
+    <ul>
+        <li>低空障碍物：建筑、线缆、鸟类撞击；阵风、湍流扰动，推力储备不足难以抵抗</li>
+        <li>空域冲突：与其他低空飞行器相撞；地面人员处于喷口下方，被高速气流冲击伤害</li>
+    </ul>
+</div>
+
+<div class="box">
+    <h2>三、FMEA失效模式与影响分析</h2>
+    <div class="warn">
+        <p><strong>关键失效模式汇总</strong></p>
+    </div>
+    <ul>
+        <li><strong>失效模式1：高压气瓶破裂</strong><br>影响：液氮大量喷射、爆炸冲击、缺氧窒息；严重度S=10，发生概率O=3，风险优先数RPN=30</li>
+        <li><strong>失效模式2：单个推力喷口失效</strong><br>影响：推力不平衡，姿态偏转；严重度S=8，发生概率O=4，RPN=32</li>
+        <li><strong>失效模式3：飞控主控制器断电</strong><br>影响：全部推力不可控，失去稳定；严重度S=9，发生概率O=2，RPN=18</li>
+        <li><strong>失效模式4：电池热失控</strong><br>影响：起火燃烧，地面/飞行工况均会造成乘员伤亡；严重度S=9，发生概率O=2，RPN=18</li>
+        <li><strong>失效模式5：GNSS/高度计失效</strong><br>影响：高度、位置感知丢失，无法避障；严重度S=7，发生概率O=4，RPN=28</li>
+    </ul>
+</div>
+
+<div class="box">
+    <h2>四、风险矩阵评估</h2>
+    <p>按照严重度、发生概率划分风险等级：</p>
+    <div class="danger">
+        <p><strong>高风险（必须强制降低风险）：高压容器破裂、多喷口同时失效、飞控全失电</strong></p>
+    </div>
+    <div class="warn">
+        <p><strong>中风险：单喷口失效、传感器失效、电池热失控</strong></p>
+    </div>
+    <p>低风险：轻微数据漂移、非关键传感器噪声，可通过算法滤波补偿。</p>
+    <p>核心短板：冷气体推进没有冗余动力储备，一旦推进介质耗尽，没有备用升力装置，不具备容错坠降能力，这是该构型区别于多旋翼eVTOL最致命的安全缺陷。</p>
+</div>
+
+<div class="box">
+    <h2>五、安全防护与缓解策略</h2>
+    <h3>1. 硬件安全冗余</h3>
+    <ul>
+        <li>气瓶采用航天级复合材料，设置爆破片、压力传感器、温度监测，超压自动泄压；独立隔离舱，和乘员舱、电池包物理分隔</li>
+        <li>飞控、IMU、高度计采用双余度架构，主备切换；独立供电回路，飞控电池和动力电池分开</li>
+        <li>喷口分组独立控制，单喷口故障后，剩余喷口自动差动补偿姿态</li>
+    </ul>
+    <h3>2. 软件与控制安全</h3>
+    <ul>
+        <li>设置飞行包线限制：最大飞行时长、高度、风速硬限制，超出边界强制终止飞行</li>
+        <li>故障诊断实时监控，一旦检测到压力/推力异常，优先执行降落逻辑，禁止继续抬升</li>
+        <li>地面互锁：喷口只有在满足离地、空域许可条件下才允许启动，地面模式锁死推力系统，防止地面误喷射伤人</li>
+    </ul>
+    <h3>3. 乘员安全与被动防护</h3>
+    <ul>
+        <li>乘员舱强化防冲击结构；配备安全带、缓冲吸能结构；该构型没有降落伞系统，是重大短板</li>
+        <li>低温防护：气瓶舱隔热，防止车身结构、乘员接触低温介质</li>
+    </ul>
+    <h3>4. 运行安全管控</h3>
+    <ul>
+        <li>限定飞行区域，仅允许在封闭试飞场地飞行，禁止城市人口密集区飞行</li>
+        <li>起飞前全流程自检：气瓶压力、阀门、传感器、电池状态，自检不通过禁止进入飞行模式</li>
+    </ul>
+</div>
+
+<div class="box">
+    <h2>六、适航与法规安全要求分析</h2>
+    <p>载人低空飞行器适航标准对持续安全、故障容错有强制要求：该冷气体方案飞行时间极短、无备用升力，很难满足常规载人eVTOL适航条款。</p>
+    <ul>
+        <li>仅可按照实验类、特种展示飞行器申请许可，不能取得商用空中出租车适航认证；</li>
+        <li>空域管制：低空飞行报备、隔离空域、地面安全警戒区是硬性前置条件；</li>
+        <li>责任风险：一旦发生事故，高压压力容器、飞行失控会带来极高的法律责任。</li>
+    </ul>
+</div>
+
+<div class="box">
+    <h2>七、综合安全结论</h2>
+    <p>Tesla Flying Roadster 依靠冷气体推进的构型，在原理上可以实现短时飞行，但<strong>固有安全缺陷很难根除</strong>：推进能量储量极低、缺少冗余升力、高压低温危险源集中。</p>
+    <p>在全套安全防护措施落地后，仅可以在封闭场地、严格管控的试飞场景下实现可接受的安全水平；不具备在开放空域、城市通勤场景下的安全运行能力。相比多旋翼eVTOL，该构型安全容错空间更小，风险更高。</p>
+</div>
+
+<div class="box">
+    <h2>八、参考文献</h2>
+    <p class="ref">[1] 系统安全工程：HAZOP、FMEA风险分析规范</p>
+    <p class="ref">[2] Vertical Flight Society eVTOL安全与适航指南</p>
+    <p class="ref">[3] Tesla Flying Roadster SpaceX冷推进系统公开资料</p>
+    <p class="ref">[4] 载人低空飞行器安全风险评估相关研究</p>
+</div>
+
+<footer>
+    <p>飞行汽车技术基础｜课程作业2 全方位安全分析</p>
+</footer>
+</body>
+</html>
